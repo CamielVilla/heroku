@@ -7,20 +7,3 @@ spring:
       mail:
         smtp:
           auth: 'true'
-#  jpa:
-#    hibernate:
-#      ddl-auto: none
-#    defer-datasource-initialization: true
-#    repositories:
-#      enabled: true
-#    dialect: org.hibernate.dialect.MySQL5Dialect
-#    show-sql: true
-#  datasource:
-#    url: jdbc:mysql://{URL}:${PORT}/${ENDPOINT}
-#    username: ${USERNAME}
-#    password: ${PASSWORD}
-#    driver-class-name: com.mysql.jdbc.Driver
-
-
-
-
