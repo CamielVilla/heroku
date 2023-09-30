@@ -61,7 +61,7 @@ public class UserService implements IUserService{
             });
             try{
                 MimeMessage msg = new MimeMessage(session);
-                msg.setFrom("info@thelastages.com");
+                msg.setFrom("info@wagebuddy.nl");
                 msg.setRecipients(Message.RecipientType.TO,
                         dto.getEmailAddress());
                 msg.setSubject("Bedankt voor je aanmelding bij WageBuddy!");
