@@ -28,11 +28,11 @@ public class UserService implements IUserService{
     UserRepository userRepository;
     EmailConfiguration emailConfiguration;
 
-    @Value("${spring.mail.username}")
-    private String userName;
+//    @Value("${spring.mail.username}")
+    private String userName = "info@thelastages.com";
 
-    @Value("${spring.mail.password}")
-    private String password;
+//    @Value("${spring.mail.password}")
+    private String password = "Hostnetiskanker!00";
 
     @Autowired
     JavaMailSender sender;
@@ -44,24 +44,17 @@ public class UserService implements IUserService{
         this.emailConfiguration = emailConfiguration;
     }
 
-    private static final String MESSAGE = "<html><head></head><body><p>Dear board game fanatic, <br><br>\n" +
-            "    We want to thank you for your interest in The Last Ages. As for this moment we are working hard to finish our\n" +
-            "    board game. We plan to launch later this year and would love to keep you updated on the process.<br><br>\n" +
-            "    A pre-order opportunity is coming soon to make sure you are one of the first people on earth that can play a real-time strategy game\n" +
-            "    within the comfort of your own home gathered by your friends and family.<br><br>\n" +
-            "    Do you wish to receive more information about the game or have some cool ideas? Please don't hesitate to contact us.<br><br>\n" +
-            "    Kind Regards,<br><br>\n" +
-            "    Camiel, Jasper, Ruben & Yuri<br>\n" +
-            "    info@thelastages.com\n" +
+    private static final String MESSAGE = "<html><head></head><body><p>Beste professional, <br><br>\n" +
+            "    Dankjewel voor je aanmelding bij WageBuddy.\n" +
+            "    Een van onze collega's probeert je vandaag te bellen. Wil je liever een voorkeurstijd doorgeven?\n" +
+            "    Stuur gewoon een mailtje naar info@wagebuddy.nl.<br><br>\n" +
+            "    Vriendelijke groet,<br><br>\n" +
+            "    Team WageBuddy\n" +
             "</p></body></html>";
 
     private static final String ENCODE = "text/html; charset=UTF-8";
 
     public Boolean addEmail(CreateUserDto dto) {
-        Optional<User> optionalEmail = userRepository.findEmailByEmail(dto.getEmailAddress());
-        if (!optionalEmail.isPresent()) {
-            User user = new User();
-            user.setEmail(dto.getEmailAddress());
             Properties props = new Properties();
             props.setProperty("mail.transport.protocol", "smtp");
             props.setProperty("mail.host", "smtp.hostnet.nl");
@@ -80,33 +73,28 @@ public class UserService implements IUserService{
                 msg.setFrom("info@thelastages.com");
                 msg.setRecipients(Message.RecipientType.TO,
                         dto.getEmailAddress());
-                msg.setSubject("Thank you for your interest The Last Ages");
+                msg.setSubject("Bedankt voor je aanmelding bij WageBuddy!");
                 msg.setSentDate(new Date());
                 msg.setText(MESSAGE);
                 msg.setHeader("Content-Type", ENCODE);
                 Transport.send(msg);
-                userRepository.save(user);
+                sendMail(session, dto);
                 return true;
             }catch (MessagingException mex){
                 System.out.println("send failed, exception: " + mex);
+                return false;
             }
-        }else {
-            return false;
-        }
-       return false;
     }
 
-
-
-    public UserDto toDto (User user){
-        UserDto dto = new UserDto();
-        dto.setEmail(user.getEmail());
-        dto.setId(user.getId());
-        return dto;
+    private void sendMail(Session session, CreateUserDto dto) throws MessagingException {
+        MimeMessage msg = new MimeMessage(session);
+        msg.setFrom("info@thelastages.com");
+        msg.setRecipients(Message.RecipientType.TO, "camielvilla@gmail.com");
+        msg.setSubject("Nieuwe aanmelding voor WageBuddy");
+        msg.setSentDate(new Date());
+        msg.setText(dto.getEmailAddress());
+        msg.setHeader("Content-Type", ENCODE);
+        Transport.send(msg);
     }
-
-   public List<User> getAllEmails(){
-        return userRepository.findAll();
-   }
 
 }

@@ -4,6 +4,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.validation.constraints.Email;
 
 public class CreateUserDto {
+
     @Nonnull
     @Email
     private String emailAddress;
