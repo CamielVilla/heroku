@@ -2,7 +2,7 @@ package nl.thelastages.website.controller;
 
 import jakarta.validation.Valid;
 import nl.thelastages.website.service.UserService;
-import nl.thelastages.website.model.dto.CreateUserDto;
+import nl.thelastages.website.model.dto.NewUserDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +20,7 @@ public class UserController {
     }
 
     @PostMapping("/addemail")
-    public ResponseEntity<Boolean> addEmail (@Valid @RequestBody CreateUserDto dto) {
+    public ResponseEntity<Boolean> addEmail (@Valid @RequestBody NewUserDTO dto) {
         return ResponseEntity.ok(userService.addEmail(dto));
     }
 

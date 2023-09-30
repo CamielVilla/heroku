@@ -3,44 +3,35 @@ package nl.thelastages.website.service;
 import jakarta.mail.*;
 import jakarta.mail.internet.MimeMessage;
 import nl.thelastages.website.configuration.EmailConfiguration;
-//import nl.thelastages.website.configuration.SmtpAuthenticator;
-import nl.thelastages.website.model.dto.CreateUserDto;
-import nl.thelastages.website.model.dto.UserDto;
-import nl.thelastages.website.model.entity.User;
-import nl.thelastages.website.respository.UserRepository;
+import nl.thelastages.website.model.dto.NewUserDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 import java.util.Properties;
 
 @Service
 public class UserService implements IUserService{
-    UserRepository userRepository;
     EmailConfiguration emailConfiguration;
 
 //    @Value("${spring.mail.username}")
-    private String userName = "info@thelastages.com";
+    private String userName;
 
-//    @Value("${spring.mail.password}")
-    private String password = "Hostnetiskanker!00";
+    @Value("${spring.mail.password}")
+    private String password;
+
+    @Value("${spring.mail.receiver}")
+    private String receiver;
+
 
     @Autowired
     JavaMailSender sender;
 
 
 
-    public UserService(UserRepository userRepository, EmailConfiguration emailConfiguration) {
-        this.userRepository = userRepository;
+    public UserService(EmailConfiguration emailConfiguration) {
         this.emailConfiguration = emailConfiguration;
     }
 
@@ -54,7 +45,7 @@ public class UserService implements IUserService{
 
     private static final String ENCODE = "text/html; charset=UTF-8";
 
-    public Boolean addEmail(CreateUserDto dto) {
+    public Boolean addEmail(NewUserDTO dto) {
             Properties props = new Properties();
             props.setProperty("mail.transport.protocol", "smtp");
             props.setProperty("mail.host", "smtp.hostnet.nl");
@@ -86,13 +77,13 @@ public class UserService implements IUserService{
             }
     }
 
-    private void sendMail(Session session, CreateUserDto dto) throws MessagingException {
+    private void sendMail(Session session, NewUserDTO dto) throws MessagingException {
         MimeMessage msg = new MimeMessage(session);
         msg.setFrom("info@thelastages.com");
-        msg.setRecipients(Message.RecipientType.TO, "camielvilla@gmail.com");
+        msg.setRecipients(Message.RecipientType.TO, receiver);
         msg.setSubject("Nieuwe aanmelding voor WageBuddy");
         msg.setSentDate(new Date());
-        msg.setText(dto.getEmailAddress());
+        msg.setText(dto.getName() +" " + dto.getEmailAddress() +  " " + dto.getPhone());
         msg.setHeader("Content-Type", ENCODE);
         Transport.send(msg);
     }
