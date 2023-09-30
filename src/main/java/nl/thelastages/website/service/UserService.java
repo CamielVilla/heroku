@@ -16,7 +16,7 @@ import java.util.Properties;
 public class UserService implements IUserService{
     EmailConfiguration emailConfiguration;
 
-//    @Value("${spring.mail.username}")
+    @Value("${spring.mail.username}")
     private String userName;
 
     @Value("${spring.mail.password}")
