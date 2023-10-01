@@ -79,7 +79,7 @@ public class UserService implements IUserService{
 
     private void sendMail(Session session, NewUserDTO dto) throws MessagingException {
         MimeMessage msg = new MimeMessage(session);
-        msg.setFrom("info@thelastages.com");
+        msg.setFrom("info@wagebuddy.nl");
         msg.setRecipients(Message.RecipientType.TO, receiver);
         msg.setSubject("Nieuwe aanmelding voor WageBuddy");
         msg.setSentDate(new Date());
