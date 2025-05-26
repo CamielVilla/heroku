@@ -16,15 +16,16 @@ spring:
     hibernate:
       ddl-auto: none
     defer-datasource-initialization: true
-    repositories:
-      enabled: true
-    dialect: org.hibernate.dialect.MySQL5Dialect
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
+
   datasource:
-    url: {JDBC_DATABASE_URL}
+    url: ${JDBC_DATABASE_URL}
     username: ${JDBC_DATABASE_USERNAME}
     password: ${JDBC_DATABASE_PASSWORD}
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: org.postgresql.Driver
 
 #  jpa:
 #    hibernate:
