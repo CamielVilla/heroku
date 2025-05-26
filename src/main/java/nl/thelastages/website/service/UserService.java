@@ -1,112 +1,72 @@
 package nl.thelastages.website.service;
 
-import jakarta.mail.*;
+import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import nl.thelastages.website.configuration.EmailConfiguration;
-//import nl.thelastages.website.configuration.SmtpAuthenticator;
 import nl.thelastages.website.model.dto.CreateUserDto;
 import nl.thelastages.website.model.dto.UserDto;
 import nl.thelastages.website.model.entity.User;
 import nl.thelastages.website.respository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.stereotype.Component;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
 
 @Service
-public class UserService implements IUserService{
-    UserRepository userRepository;
-    EmailConfiguration emailConfiguration;
+public class UserService implements IUserService {
 
-    @Value("${spring.mail.username}")
-    private String userName;
+    private final UserRepository userRepository;
+    private final JavaMailSender mailSender;
 
-    @Value("${spring.mail.password}")
-    private String password;
+    private final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-    @Autowired
-    JavaMailSender sender;
-
-
-
-    public UserService(UserRepository userRepository, EmailConfiguration emailConfiguration) {
-        this.userRepository = userRepository;
-        this.emailConfiguration = emailConfiguration;
-    }
-
-    private static final String MESSAGE = "<html><head></head><body><p>Dear board game fanatic, <br><br>\n" +
-            "    We want to thank you for your interest in The Last Ages. As for this moment we are working hard to finish our\n" +
-            "    board game. We plan to launch later this year and would love to keep you updated on the process.<br><br>\n" +
-            "    A pre-order opportunity is coming soon to make sure you are one of the first people on earth that can play a real-time strategy game\n" +
-            "    within the comfort of your own home gathered by your friends and family.<br><br>\n" +
-            "    Do you wish to receive more information about the game or have some cool ideas? Please don't hesitate to contact us.<br><br>\n" +
-            "    Kind Regards,<br><br>\n" +
-            "    Camiel, Jasper, Ruben & Yuri<br>\n" +
-            "    info@thelastages.com\n" +
+    private static final String MESSAGE = "<html><body><p>Dear board game fanatic,<br><br>" +
+            "We want to thank you for your interest in The Last Ages...<br><br>" +
+            "Kind Regards,<br>Camiel, Jasper, Ruben & Yuri<br>info@thelastages.com" +
             "</p></body></html>";
 
-    private static final String ENCODE = "text/html; charset=UTF-8";
-
-    public Boolean addEmail(CreateUserDto dto) {
-        Optional<User> optionalEmail = userRepository.findEmailByEmail(dto.getEmailAddress());
-        if (!optionalEmail.isPresent()) {
-            User user = new User();
-            user.setEmail(dto.getEmailAddress());
-            Properties props = new Properties();
-            props.setProperty("mail.transport.protocol", "smtp");
-            props.setProperty("mail.host", "smtp.hostnet.nl");
-            props.put("mail.smtp.auth", "true");
-            props.put("mail.smtp.port", "587");
-            props.put("mail.smtp.starttls.enabled", true);
-
-            Session session = Session.getDefaultInstance(props, new Authenticator() {
-                @Override
-                protected PasswordAuthentication getPasswordAuthentication(){
-                    return new PasswordAuthentication(userName, password);
-                }
-            });
-            try{
-                MimeMessage msg = new MimeMessage(session);
-                msg.setFrom("info@thelastages.com");
-                msg.setRecipients(Message.RecipientType.TO,
-                        dto.getEmailAddress());
-                msg.setSubject("Thank you for your interest The Last Ages");
-                msg.setSentDate(new Date());
-                msg.setText(MESSAGE);
-                msg.setHeader("Content-Type", ENCODE);
-                Transport.send(msg);
-                userRepository.save(user);
-                return true;
-            }catch (MessagingException mex){
-                System.out.println("send failed, exception: " + mex);
-            }
-        }else {
-            return false;
-        }
-       return false;
+    public UserService(UserRepository userRepository, JavaMailSender mailSender) {
+        this.userRepository = userRepository;
+        this.mailSender = mailSender;
     }
 
+    public Boolean addEmail(CreateUserDto dto) {
+        if (userRepository.findEmailByEmail(dto.getEmailAddress()).isPresent()) {
+            return false; // Already subscribed
+        }
 
+        User user = new User();
+        user.setEmail(dto.getEmailAddress());
 
-    public UserDto toDto (User user){
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom("info@thelastages.com");
+            helper.setTo(dto.getEmailAddress());
+            helper.setSubject("Thank you for your interest in The Last Ages");
+            helper.setText(MESSAGE, true);
+
+            mailSender.send(message);
+            userRepository.save(user);
+            return true;
+
+        } catch (MessagingException e) {
+            logger.error("Failed to send welcome email to {}", dto.getEmailAddress(), e);
+            return false;
+        }
+    }
+
+    public UserDto toDto(User user) {
         UserDto dto = new UserDto();
         dto.setEmail(user.getEmail());
         dto.setId(user.getId());
         return dto;
     }
 
-   public List<User> getAllEmails(){
+    public List<User> getAllEmails() {
         return userRepository.findAll();
-   }
-
+    }
 }
+

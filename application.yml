@@ -1,11 +1,17 @@
 spring:
   mail:
+    host: smtp.hostnet.nl
+    port: 587
     username: ${EMAIL}
     password: ${EMAIL_PASSWORD}
+    protocol: smtp
     properties:
       mail:
         smtp:
           auth: 'true'
+        starttls:
+          enable: true
+
   jpa:
     hibernate:
       ddl-auto: none
@@ -15,11 +21,30 @@ spring:
     dialect: org.hibernate.dialect.MySQL5Dialect
     show-sql: true
   datasource:
-    url: jdbc:mysql://{URL}:${PORT}/${ENDPOINT}
-    username: ${USERNAME}
-    password: ${PASSWORD}
+    url: {JDBC_DATABASE_URL}
+    username: ${JDBC_DATABASE_USERNAME}
+    password: ${JDBC_DATABASE_PASSWORD}
     driver-class-name: com.mysql.jdbc.Driver
 
+#  jpa:
+#    hibernate:
+#      ddl-auto: create-drop # of 'update' als je data tussen tests wilt bewaren
+#    defer-datasource-initialization: true
+#    show-sql: true
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.H2Dialect
+#
+#  datasource:
+#    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+#    driver-class-name: org.h2.Driver
+#    username: sa
+#    password:
+#
+#  h2:
+#    console:
+#      enabled: true
+#      path: /h2-console
 
 
 
