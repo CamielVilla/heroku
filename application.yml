@@ -28,3 +28,6 @@ spring:
       maximum-pool-size: 4
       minimum-idle: 1
       pool-name: AppPool
+
+recaptcha:
+  secret: ${RECAPTCHA}
