@@ -8,6 +8,7 @@ import nl.thelastages.website.model.entity.User;
 import nl.thelastages.website.respository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -16,16 +17,12 @@ import java.util.List;
 
 @Service
 public class UserService implements IUserService {
-
+    private final Logger logger = LoggerFactory.getLogger(UserService.class);
     private final UserRepository userRepository;
     private final JavaMailSender mailSender;
 
-    private final Logger logger = LoggerFactory.getLogger(UserService.class);
-
-    private static final String MESSAGE = "<html><body><p>Dear board game fanatic,<br><br>" +
-            "We want to thank you for your interest in The Last Ages...<br><br>" +
-            "Kind Regards,<br>Camiel, Jasper, Ruben & Yuri<br>info@thelastages.com" +
-            "</p></body></html>";
+    @Value("${spring.mail.username}")
+    private String userName;
 
     public UserService(UserRepository userRepository, JavaMailSender mailSender) {
         this.userRepository = userRepository;
@@ -43,7 +40,7 @@ public class UserService implements IUserService {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom("info@thelastages.com");
+            helper.setFrom(userName);
             helper.setTo(dto.getEmailAddress());
             helper.setSubject("Thank you for your interest in The Last Ages");
             helper.setText(MESSAGE, true);
@@ -58,15 +55,11 @@ public class UserService implements IUserService {
         }
     }
 
-    public UserDto toDto(User user) {
-        UserDto dto = new UserDto();
-        dto.setEmail(user.getEmail());
-        dto.setId(user.getId());
-        return dto;
-    }
 
-    public List<User> getAllEmails() {
-        return userRepository.findAll();
-    }
+    private static final String MESSAGE = "<html><body><p>Dear board game fanatic,<br><br>" +
+            "We want to thank you for your interest in The Last Ages. We will contact you about future developments.<br><br>" +
+            "Kind Regards,<br>Camiel, Jasper, Ruben & Yuri<br>info@thelastages.com" +
+            "</p></body></html>";
+
 }
 
